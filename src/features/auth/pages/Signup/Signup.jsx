@@ -1,15 +1,61 @@
-import { Button, FloatingLabel, Select } from "flowbite-react";
-import { useState } from "react";
+import { Button, FloatingLabel, Select, Spinner } from "flowbite-react";
+import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import ErrorMsg from "../../../../shared/components/Error-Message/ErrorMsg";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import axios from "axios";
+import { API_URL } from "../../../../shared/consts/Constants";
+import { toasterContext } from "../../../../shared/contexts/ToastContext/ToastContext";
+
+const registerSchema = z
+  .object({
+    name: z
+      .string()
+      .nonempty("Full Name is required.")
+      .min(3, "Full Name must be at least 3 characters long."),
+
+    username: z
+      .string()
+      .nonempty("Full Name is required.")
+      .min(3, "Full Name must be at least 3 characters long."),
+
+    email: z
+      .email("Please enter a valid email.")
+      .nonempty("Email is Required."),
+
+    dateOfBirth: z.string(),
+    gender: z.enum(["male", "female"]),
+    password: z
+      .string()
+      .nonempty("Password is Required.")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+        "Must contain uppercase, lowercase, number and special character, with at least 8 characters.",
+      ),
+    rePassword: z.string().nonempty("Confirm Password is Required."),
+  })
+  .refine(
+    (form) => {
+      return form.password === form.rePassword ? true : false;
+    },
+    {
+      message: "Passwords do not match.",
+      path: ["rePassword"],
+    },
+  );
 
 export default function Signup() {
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRePassword, setShowRePassword] = useState(false);
+  const { showToast, hideToast } = useContext(toasterContext);
   const {
     register,
     handleSubmit,
-    formState: { errors, touchedFields, isValid },
-    getValues,
+    formState: { errors, touchedFields, isValid, isSubmitting },
     reset,
   } = useForm({
     defaultValues: {
@@ -22,10 +68,8 @@ export default function Signup() {
       rePassword: "",
     },
     mode: "all",
+    resolver: zodResolver(registerSchema),
   });
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showRePassword, setShowRePassword] = useState(false);
 
   function togglePassword() {
     setShowPassword(!showPassword);
@@ -34,12 +78,25 @@ export default function Signup() {
     setShowRePassword(!showRePassword);
   }
 
-  function createAccount(data) {
-    console.log(data);
+  async function createAccount(data) {
+    hideToast();
+    try {
+      const result = await axios.request({
+        method: "POST",
+        url: `${API_URL}/users/signup`,
+        data: data,
+      });
+      showToast(true, result.data.message);
+      navigate("/auth");
+    } catch (error) {
+      showToast(false, error.response.data.message);
+    }
   }
 
   function resetForm() {
     reset();
+    setShowPassword(false);
+    setShowRePassword(false);
   }
   return (
     <>
@@ -62,16 +119,7 @@ export default function Signup() {
               variant="standard"
               label="Full Name"
               className="text-black!"
-              {...register("name", {
-                required: {
-                  value: true,
-                  message: "Full Name is required.",
-                },
-                pattern: {
-                  value: /^[a-zA-Z ]{3,}$/,
-                  message: "Full Name must be at least 3 characters long.",
-                },
-              })}
+              {...register("name")}
             />
 
             {errors.name && touchedFields.name ? (
@@ -87,16 +135,7 @@ export default function Signup() {
               variant="standard"
               label="Username"
               className="text-black!"
-              {...register("username", {
-                required: {
-                  value: true,
-                  message: "Username is required.",
-                },
-                pattern: {
-                  value: /^[a-zA-Z ]{3,}$/,
-                  message: "Username must be at least 3 characters long.",
-                },
-              })}
+              {...register("username")}
             />
             {errors.username && touchedFields.username ? (
               <ErrorMsg mess={errors.username.message} />
@@ -111,16 +150,7 @@ export default function Signup() {
               variant="standard"
               label="Email Address"
               className="text-black!"
-              {...register("email", {
-                required: {
-                  value: true,
-                  message: "Email is required.",
-                },
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Please enter a valid email.",
-                },
-              })}
+              {...register("email")}
             />
             {errors.email && touchedFields.email ? (
               <ErrorMsg mess={errors.email.message} />
@@ -177,18 +207,7 @@ export default function Signup() {
                 label="Password"
                 type={showPassword ? "text" : "password"}
                 className="text-black!"
-                {...register("password", {
-                  required: {
-                    value: true,
-                    message: "Password is Required",
-                  },
-                  pattern: {
-                    value:
-                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                    message:
-                      "Must contain uppercase, lowercase, number and special character, with at least 8 characters.",
-                  },
-                })}
+                {...register("password")}
               />
 
               <i
@@ -211,17 +230,7 @@ export default function Signup() {
                 label="Confirm Password"
                 type={showRePassword ? "text" : "password"}
                 className="text-black!"
-                {...register("rePassword", {
-                  required: {
-                    value: true,
-                    message: "Confirm Password is Required",
-                  },
-                  validate: (value) => {
-                    if (getValues("password") !== value) {
-                      return "Passwords do not match.";
-                    }
-                  },
-                })}
+                {...register("rePassword")}
               />
 
               <i
@@ -239,11 +248,23 @@ export default function Signup() {
           {/* Actions */}
           <div className="flex justify-between items-center">
             <Button
-              disabled={!isValid}
+              disabled={!isValid || isSubmitting}
               type="submit"
-              className="text-white bg-brand box-border disabled:cursor-not-allowed disabled:bg-gray-300 border border-transparent hover:bg-brand-strong shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5"
+              className="text-white bg-brand box-border disabled:cursor-not-allowed! disabled:bg-gray-600! border border-transparent hover:bg-brand-strong shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5"
             >
-              Create
+              {isSubmitting ? (
+                <>
+                  <Spinner
+                    size="sm"
+                    aria-label="Info spinner example"
+                    className="me-3"
+                    light
+                  />
+                  Creating
+                </>
+              ) : (
+                "Create"
+              )}
             </Button>
 
             <Button

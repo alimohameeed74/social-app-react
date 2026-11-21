@@ -9,6 +9,8 @@ import SystemLayout from "./layouts/System/SystemLayout";
 import Feed from "./features/system/feed/pages/Feed/Feed";
 import Profile from "./features/system/profile/pages/Profile/Profile";
 import Notifications from "./features/system/notification/pages/Notifications/Notifications";
+import AuthGuard from "./shared/protected-routes/AuthGuard";
+import GuestGuard from "./shared/protected-routes/GuestGuard";
 
 const routes = createBrowserRouter([
   {
@@ -24,7 +26,11 @@ const routes = createBrowserRouter([
       // Auth
       {
         path: "auth",
-        element: <AuthLayout />,
+        element: (
+          <GuestGuard>
+            <AuthLayout />
+          </GuestGuard>
+        ),
         children: [
           {
             path: "",
@@ -46,7 +52,11 @@ const routes = createBrowserRouter([
       // System
       {
         path: "system",
-        element: <SystemLayout />,
+        element: (
+          <AuthGuard>
+            <SystemLayout />
+          </AuthGuard>
+        ),
         children: [
           {
             path: "",

@@ -1,10 +1,12 @@
 import { Button } from "flowbite-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import logo from "../../assets/favicon.png";
 import { Link, NavLink } from "react-router";
+import { authContext } from "../../shared/contexts/AuthContext/AuthContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { loggedUser, logout } = useContext(authContext);
 
   function toggleUserMenue() {
     setIsOpen(!isOpen);
@@ -82,10 +84,12 @@ export default function Navbar() {
             <img
               alt="Account Photo"
               className="h-8 w-8 rounded-full object-cover me-1"
-              src="https://pub-3cba56bacf9f4965bbb0989e07dada12.r2.dev/linkedPosts/default-profile.png"
+              src={loggedUser.photo}
             />
 
-            <span className="sm:me-1 m-0 hidden md:inline">Ahmed Bahnasy</span>
+            <span className="sm:me-1 m-0 hidden md:inline">
+              {loggedUser.username}
+            </span>
 
             <i className="fa-solid fa-bars"></i>
 
@@ -102,7 +106,10 @@ export default function Navbar() {
                 <i className="fa-solid fa-user-shield"></i> Change Password
               </span>
 
-              <span className="mb-2 p-2 hover:bg-red-500 hover:text-white rounded-lg w-full text-red-500">
+              <span
+                onClick={logout}
+                className="mb-2 p-2 hover:bg-red-500 hover:text-white rounded-lg w-full text-red-500"
+              >
                 <i className="fa-solid fa-arrow-right-from-bracket"></i> Sign
                 Out
               </span>
