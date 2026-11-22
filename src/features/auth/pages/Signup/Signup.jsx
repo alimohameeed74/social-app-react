@@ -278,7 +278,7 @@ export default function Signup() {
         </form>
 
         <span className="text-sm text-body block text-center pt-3">
-          Have an account?{" "}
+          Have an account?
           <Link
             to="/auth/signin"
             className="hover:decoration-1 hover:underline"

@@ -11,6 +11,7 @@ import Profile from "./features/system/profile/pages/Profile/Profile";
 import Notifications from "./features/system/notification/pages/Notifications/Notifications";
 import AuthGuard from "./shared/protected-routes/AuthGuard";
 import GuestGuard from "./shared/protected-routes/GuestGuard";
+import Suggestions from "./features/system/suggestions/pages/Suggestions/Suggestions";
 
 const routes = createBrowserRouter([
   {
@@ -73,6 +74,10 @@ const routes = createBrowserRouter([
           {
             path: "notifications",
             element: <Notifications />,
+          },
+          {
+            path: "suggestions",
+            element: <Suggestions />,
           },
         ],
       },
