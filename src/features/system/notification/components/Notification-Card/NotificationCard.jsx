@@ -1,5 +1,8 @@
+import { getTimeAgo } from "../../../../../shared/utils/date";
+
 export default function NotificationCard({
-  notification: { actor, type, isRead, entity },
+  notification: { actor, type, isRead, entity, createdAt },
+  update,
 }) {
   return (
     <article
@@ -52,7 +55,9 @@ export default function NotificationCard({
             )}
           </p>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="text-xs font-semibold text-slate-500">4s</span>
+            <span className="text-xs font-semibold text-slate-500">
+              {getTimeAgo(createdAt)}
+            </span>
             <button className="rounded-md px-2 py-1 text-xs font-bold text-[#1877f2] hover:bg-[#e7f3ff]">
               <i className="fa-solid fa-eye"></i>
             </button>
@@ -69,7 +74,10 @@ export default function NotificationCard({
           <></>
         )}
         <div className="mt-2 flex items-center gap-2">
-          <button className="items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-xs font-bold text-[#1877f2] ring-1 ring-[#dbeafe] transition hover:bg-[#e7f3ff] inline-flex">
+          <button
+            onClick={update}
+            className="items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-xs font-bold text-[#1877f2] ring-1 ring-[#dbeafe] transition hover:bg-[#e7f3ff] inline-flex"
+          >
             <i className="fa-check fa-solid"></i> Mark as read
           </button>
           {isRead ? (

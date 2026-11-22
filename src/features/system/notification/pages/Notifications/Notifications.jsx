@@ -49,6 +49,21 @@ export default function Notifications() {
     }
   }
 
+  async function markNotificationAsRead(id) {
+    try {
+      const result = await axios.request({
+        method: "PATCH",
+        url: `${API_URL}/notifications/${id}/read`,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token_")}`,
+        },
+      });
+      getNotifications();
+    } catch (error) {
+      //
+    }
+  }
+
   useEffect(() => {
     function callApi() {
       getNotifications();
@@ -113,6 +128,7 @@ export default function Notifications() {
                   <NotificationCard
                     key={notification._id}
                     notification={notification}
+                    update={() => markNotificationAsRead(notification._id)}
                   />
                 ))}
               </>
