@@ -1,8 +1,41 @@
 import { Button, Dropdown, DropdownItem, Textarea } from "flowbite-react";
-import PostCard from "../../components/Post-Card/PostCard";
 import SuggestedFriends from "../../components/Suggested-Friends/SuggestedFriends";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { API_URL } from "../../../../../shared/consts/Constants";
+import PostsList from "../../components/Posts-list/PostsList";
+import PostCardLoader from "../../../../../shared/skeletons/post/Post-Card-Loader/PostCardLoader";
 
 export default function Feed() {
+  const [posts, setPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState([]);
+
+  async function getAllPosts() {
+    setPostsLoading(true);
+    try {
+      const result = await axios.request({
+        method: "GET",
+        url: `${API_URL}/posts`,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token_")}`,
+        },
+      });
+      setPosts(result.data.data.posts);
+    } catch (error) {
+      setPosts([]);
+    } finally {
+      setPostsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    function callApi() {
+      getAllPosts();
+    }
+
+    callApi();
+  }, []);
+
   return (
     <section className="grid grid-cols-1 xl:grid-cols-4 gap-4">
       <div className="xl:col-span-1">
@@ -92,12 +125,7 @@ export default function Feed() {
         </div>
 
         {/* Posts */}
-        <div className="mt-4 flex flex-col gap-y-3">
-          <PostCard />
-          <PostCard />
-          <PostCard />
-          <PostCard />
-        </div>
+        {postsLoading ? <PostCardLoader /> : <PostsList posts={posts} />}
       </div>
     </section>
   );
