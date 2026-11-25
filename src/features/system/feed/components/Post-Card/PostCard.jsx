@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { getTimeAgo } from "../../../../../shared/utils/date";
 import { authContext } from "../../../../../shared/contexts/AuthContext/AuthContext";
 import LikesModal from "../../../../../shared/components/Likes-Modal/LikesModal";
+import PostComments from "../Post-Comments/PostComments";
 
 export default function PostCard({
   post: {
@@ -16,16 +17,23 @@ export default function PostCard({
     likesCount,
     commentsCount,
     sharesCount,
+    topComment,
   },
+  details,
 }) {
   const { loggedUser } = useContext(authContext);
   const [openLikesModal, setOpenLikesModel] = useState(false);
+  const [showPostComments, setShowPostComments] = useState(false);
 
   function openModal() {
     setOpenLikesModel(true);
   }
   function closeModal() {
     setOpenLikesModel(false);
+  }
+
+  function toggleComments() {
+    setShowPostComments(!showPostComments);
   }
   return (
     <>
@@ -94,7 +102,7 @@ export default function PostCard({
             </div>
           </div>
           {body ? (
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground truncate">
               {body}
             </p>
           ) : (
@@ -196,9 +204,13 @@ export default function PostCard({
 
               <span>{commentsCount} comments</span>
 
-              <button className="cursor-pointer rounded-md px-2 py-1 text-xs font-bold text-[#1877f2] hover:bg-[#e7f3ff] hover:underline">
-                <i className="fa-regular fa-eye"></i>
-              </button>
+              {details ? (
+                <button className="cursor-pointer rounded-md px-2 py-1 text-xs font-bold text-[#1877f2] hover:bg-[#e7f3ff] hover:underline">
+                  <i className="fa-regular fa-eye"></i>
+                </button>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
         </div>
@@ -211,7 +223,10 @@ export default function PostCard({
             <span>Like</span>
           </button>
 
-          <button className="flex cursor-pointer items-center justify-center gap-1.5 rounded-md p-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:gap-2 sm:text-sm">
+          <button
+            onClick={toggleComments}
+            className="flex cursor-pointer items-center justify-center gap-1.5 rounded-md p-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:gap-2 sm:text-sm"
+          >
             <i className="fa-regular fa-comment"></i>
             <span>Comment</span>
           </button>
@@ -221,6 +236,43 @@ export default function PostCard({
             <span>Share</span>
           </button>
         </div>
+
+        {/* Top Comment */}
+        {topComment && !showPostComments ? (
+          <div className="mx-4 mb-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+              Top Comment
+            </p>
+            <div className="flex items-start gap-2">
+              <img
+                className="h-8 w-8 rounded-full object-cover"
+                alt={topComment.commentCreator.name}
+                src={topComment.commentCreator.photo}
+              />
+              <div className="min-w-0 flex-1 rounded-2xl bg-white px-3 py-2">
+                <p className="truncate text-xs font-bold text-slate-900">
+                  {topComment.commentCreator._id === loggedUser._id
+                    ? `${topComment.commentCreator.name} (You)`
+                    : topComment.commentCreator.name}
+                </p>
+                <p className="mt-0.5 whitespace-pre-wrap text-sm text-slate-700 truncate">
+                  {topComment.content}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={toggleComments}
+              className="mt-2 text-xs font-bold text-[#1877f2] hover:underline"
+            >
+              View all comments
+            </button>
+          </div>
+        ) : (
+          <></>
+        )}
+
+        {/* All Post Comments */}
+        {showPostComments ? <PostComments postId={_id} /> : <></>}
       </article>
 
       {openLikesModal ? <LikesModal id={_id} close={closeModal} /> : <></>}

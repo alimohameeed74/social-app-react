@@ -1,14 +1,19 @@
 import { Button, Dropdown, DropdownItem, Textarea } from "flowbite-react";
 import SuggestedFriends from "../../components/Suggested-Friends/SuggestedFriends";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../../../../../shared/consts/Constants";
 import PostsList from "../../components/Posts-list/PostsList";
 import PostCardLoader from "../../../../../shared/skeletons/post/Post-Card-Loader/PostCardLoader";
+import { authContext } from "../../../../../shared/contexts/AuthContext/AuthContext";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState([]);
+
+  const {
+    loggedUser: { username, name, photo },
+  } = useContext(authContext);
 
   async function getAllPosts() {
     setPostsLoading(true);
@@ -49,11 +54,11 @@ export default function Feed() {
               <img
                 alt="Account Logo"
                 className="h-12 w-12 rounded-full"
-                src="https://pub-3cba56bacf9f4965bbb0989e07dada12.r2.dev/linkedPosts/default-profile.png"
+                src={photo}
               />
 
               <div className="flex flex-col gap-1">
-                <h2 className="font-bold text-[16px] text-black">fady Alla</h2>
+                <h2 className="font-bold text-[16px] text-black">{name}</h2>
 
                 <Dropdown
                   className="bg-white! text-black! border border-gray-300! font-medium!"
@@ -80,7 +85,7 @@ export default function Feed() {
               rows={4}
               autoComplete="off"
               className="resize-none bg-white! text-sm shadow-xs border border-gray-300! placeholder:text-gray-400! placeholder:font-normal! text-black!"
-              placeholder="What's on your mind, fady?"
+              placeholder={`What's on your mind, ${username}?`}
             />
 
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-400 pt-3">

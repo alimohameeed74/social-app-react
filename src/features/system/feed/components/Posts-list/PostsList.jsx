@@ -11,7 +11,7 @@ export default function PostsList({ posts }) {
     return (
       <div className="mt-3 flex flex-col gap-y-3">
         {posts.map((post) => (
-          <PostCard key={post._id} post={post} />
+          <PostCard key={post._id} post={post} details={true} />
         ))}
       </div>
     );
