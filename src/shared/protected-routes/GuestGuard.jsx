@@ -6,7 +6,7 @@ export default function GuestGuard({ children }) {
   const { loggedUser } = useContext(authContext);
 
   if (loggedUser) {
-    return <Navigate to={"/system"} replace />;
+    return <Navigate to={"/system/feed"} replace />;
   } else {
     return children;
   }
